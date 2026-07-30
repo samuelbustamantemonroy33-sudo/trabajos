@@ -7,12 +7,9 @@ import ContactoCard from "./components/ContactoCard";
 // Importa el formulario para crear contactos.
 import FormularioContacto from "./components/FormularioContacto";
 
-// Componente principal de la agenda.
 export default function App() {
-  // Estado: lista de contactos inicial con un ejemplo.
   const [contactos, setContactos] = useState([
     {
-      // Identificador único del contacto.
       id: 1,
       nombre: "Carolina Pérez",
       telefono: "300 123 4567",
@@ -21,32 +18,52 @@ export default function App() {
     },
   ]);
 
-  // Agrega un nuevo contacto al estado.
-  const agregarContacto = (nuevo) => {
-    // Toma el estado previo y agrega el nuevo con un id generado.
-    setContactos((prev) => [...prev, { id: Date.now(), ...nuevo }]);
+  // Guardará el contacto completo a editar (o null si solo estamos agregando)
+  const [contactoEnEdicion, setContactoEnEdicion] = useState(null);
+
+  // Agrega o edita según corresponda
+  const guardarContacto = (datos) => {
+    if (contactoEnEdicion) {
+      // Si estamos editando, reemplazamos el objeto correspondiente por su ID
+      setContactos((prev) =>
+        prev.map((c) => (c.id === contactoEnEdicion.id ? { ...c, ...datos } : c))
+      );
+      setContactoEnEdicion(null); // Limpiamos el modo edición
+    } else {
+      // Si no estamos editando, agregamos un nuevo contacto
+      setContactos((prev) => [...prev, { id: Date.now(), ...datos }]);
+    }
   };
 
-  // Elimina un contacto por su id.
   const eliminarContacto = (id) => {
-    // Filtra todos menos el que coincide con el id a eliminar.
     setContactos((prev) => prev.filter((c) => c.id !== id));
+    // Si eliminamos el que se estaba editando, limpiamos la edición
+    if (contactoEnEdicion?.id === id) setContactoEnEdicion(null);
+  };
+
+  // Prepara un contacto para cargarlo en el formulario
+  const seleccionarParaEditar = (contacto) => {
+    setContactoEnEdicion(contacto);
   };
 
   return (
     <main className="app-container">
       <h1 className="app-title">Agenda ADSO v2</h1>
-      <FormularioContacto onAgregar={agregarContacto} />
+
+      {/* Pasamos guardarContacto y el contacto que se va a editar */}
+      <FormularioContacto
+        onGuardar={guardarContacto}
+        contactoEnEdicion={contactoEnEdicion}
+        onCancelar={() => setContactoEnEdicion(null)}
+      />
+
       <section className="lista-contactos">
         {contactos.map((c) => (
           <ContactoCard
             key={c.id}
-            id={c.id}
-            nombre={c.nombre}
-            telefono={c.telefono}
-            correo={c.correo}
-            etiqueta={c.etiqueta}
+            contacto={c}
             onDelete={eliminarContacto}
+            onEdit={() => seleccionarParaEditar(c)}
           />
         ))}
       </section>

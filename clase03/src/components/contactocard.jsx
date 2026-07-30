@@ -18,6 +18,16 @@ export default function ContactoCard({ id, nombre, telefono, correo, etiqueta, o
         >
           Eliminar
         </button>
+
+        <button
+        type="button"
+        assName="btn-editar"
+        onedit={() => onEdit(id)}
+      >
+        Editar
+          
+        </button>
+        
       </div>
     </article>
   );

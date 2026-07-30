@@ -43,4 +43,7 @@ export default function FormularioContacto({ onAgregar }) {
       <button type="submit">Agregar contacto</button>
     </form>
   );
+  
+
+
 }
