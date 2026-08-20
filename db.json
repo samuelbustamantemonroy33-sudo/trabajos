@@ -1,24 +1,11 @@
 {
-  "tareas": [
+  "contactos": [
     {
       "id": "1",
-      "texto": "aprendiendo react",
-      "estado": "pendiente"
-    },
-    {
-      "texto": "hola",
-      "estado": "pendiente",
-      "id": "liatp3C30WM"
-    },
-    {
-      "texto": " cssdds",
-      "estado": "pendiente",
-      "id": "FKvzICYtxwo"
-    },
-    {
-      "texto": " sdcds",
-      "estado": "pendiente",
-      "id": "uZf1dd_Mex4"
+      "nombre": "Ana Garcia",
+      "telefono": "600 123 456",
+      "correo": "ana@example.com",
+      "etiqueta": "familia"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
