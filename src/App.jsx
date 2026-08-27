@@ -22,7 +22,6 @@ export default function App() {
   const [contactoEnEdicion, setContactoEnEdicion] = useState(null);
   const [error, setError] = useState("");
   const [busqueda, setBusqueda] = useState("");
-  const [busquedaAplicada, setBusquedaAplicada] = useState("");
   const [ordenAscendente, setOrdenAscendente] = useState(true);
 
   // Agrega o edita según corresponda
@@ -57,11 +56,6 @@ export default function App() {
     setContactoEnEdicion(contacto);
   };
 
-  const buscarContactos = (e) => {
-    e.preventDefault();
-    setBusquedaAplicada(busqueda.trim());
-  };
-
   const normalizarTexto = (texto) =>
     texto
       .toLocaleLowerCase("es")
@@ -70,7 +64,7 @@ export default function App() {
 
   const contactosVisibles = contactos
     .filter((contacto) => {
-      const termino = normalizarTexto(busquedaAplicada);
+      const termino = normalizarTexto(busqueda.trim());
       return !termino || normalizarTexto(contacto.nombre).startsWith(termino);
     })
     .sort((a, b) => {
@@ -106,7 +100,7 @@ export default function App() {
 
       <section className="contactos-section" aria-labelledby="contactos-title">
         <div className="section-heading"><div><p className="eyebrow">LISTA PERSONAL</p><h2 id="contactos-title">Contactos guardados</h2></div><span className="section-line" aria-hidden="true" /></div>
-        <form className="controles-contactos" onSubmit={buscarContactos} role="search">
+        <div className="controles-contactos" role="search">
           <label htmlFor="buscar-contactos">Buscar por nombre</label>
           <div className="controles-contactos-fila">
             <input
@@ -117,7 +111,6 @@ export default function App() {
               placeholder="Ej. Ana o Z"
               aria-label="Buscar contactos por el inicio del nombre"
             />
-            <button type="submit">Buscar</button>
             <button
               type="button"
               className="btn-ordenar"
@@ -127,8 +120,8 @@ export default function App() {
               {ordenAscendente ? "A-Z" : "Z-A"}
             </button>
           </div>
-        </form>
-        {busquedaAplicada && <p className="resumen-busqueda">Resultados para “{busquedaAplicada}”: {contactosVisibles.length}</p>}
+        </div>
+        {busqueda && <p className="resumen-busqueda">Resultados para “{busqueda}”: {contactosVisibles.length}</p>}
         <div className="lista-contactos">
         {contactosVisibles.length === 0 ? (
           <p className="sin-resultados">No se encontraron contactos con ese inicio de nombre.</p>
