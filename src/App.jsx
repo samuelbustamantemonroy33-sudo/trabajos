@@ -21,6 +21,9 @@ export default function App() {
   // Guardará el contacto completo a editar (o null si solo estamos agregando)
   const [contactoEnEdicion, setContactoEnEdicion] = useState(null);
   const [error, setError] = useState("");
+  const [busqueda, setBusqueda] = useState("");
+  const [busquedaAplicada, setBusquedaAplicada] = useState("");
+  const [ordenAscendente, setOrdenAscendente] = useState(true);
 
   // Agrega o edita según corresponda
   const guardarContacto = async (datos) => {
@@ -54,6 +57,30 @@ export default function App() {
     setContactoEnEdicion(contacto);
   };
 
+  const buscarContactos = (e) => {
+    e.preventDefault();
+    setBusquedaAplicada(busqueda.trim());
+  };
+
+  const normalizarTexto = (texto) =>
+    texto
+      .toLocaleLowerCase("es")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+
+  const contactosVisibles = contactos
+    .filter((contacto) => {
+      const termino = normalizarTexto(busquedaAplicada);
+      return !termino || normalizarTexto(contacto.nombre).startsWith(termino);
+    })
+    .sort((a, b) => {
+      const resultado = normalizarTexto(a.nombre).localeCompare(
+        normalizarTexto(b.nombre),
+        "es"
+      );
+      return ordenAscendente ? resultado : -resultado;
+    });
+
   return (
     <main className="app-container">
       <header className="app-header">
@@ -79,8 +106,33 @@ export default function App() {
 
       <section className="contactos-section" aria-labelledby="contactos-title">
         <div className="section-heading"><div><p className="eyebrow">LISTA PERSONAL</p><h2 id="contactos-title">Contactos guardados</h2></div><span className="section-line" aria-hidden="true" /></div>
+        <form className="controles-contactos" onSubmit={buscarContactos} role="search">
+          <label htmlFor="buscar-contactos">Buscar por nombre</label>
+          <div className="controles-contactos-fila">
+            <input
+              id="buscar-contactos"
+              type="search"
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              placeholder="Ej. Ana o Z"
+              aria-label="Buscar contactos por el inicio del nombre"
+            />
+            <button type="submit">Buscar</button>
+            <button
+              type="button"
+              className="btn-ordenar"
+              onClick={() => setOrdenAscendente((actual) => !actual)}
+              aria-label={`Ordenar contactos de ${ordenAscendente ? "Z a A" : "A a Z"}`}
+            >
+              {ordenAscendente ? "A-Z" : "Z-A"}
+            </button>
+          </div>
+        </form>
+        {busquedaAplicada && <p className="resumen-busqueda">Resultados para “{busquedaAplicada}”: {contactosVisibles.length}</p>}
         <div className="lista-contactos">
-        {contactos.map((c) => (
+        {contactosVisibles.length === 0 ? (
+          <p className="sin-resultados">No se encontraron contactos con ese inicio de nombre.</p>
+        ) : contactosVisibles.map((c) => (
           <ContactoCard
             key={c.id}
             contacto={c}
