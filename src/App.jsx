@@ -1,5 +1,5 @@
-// Importa el hook para manejar estado local.
-import { useState } from "react";
+// Importa los hooks para manejar estado local y efectos.
+import { useEffect, useState } from "react";
 // Importa estilos globales del componente principal.
 import "./App.css";
 // Importa la tarjeta visual para cada contacto.
@@ -16,6 +16,48 @@ export default function App() {
       correo: "carolina@sena.edu.co",
       etiqueta: "Compañera",
     },
+    {
+      id: 2,
+      nombre: "Mateo Silva",
+      telefono: "301 456 8899",
+      correo: "mateo@sena.edu.co",
+      etiqueta: "Familia",
+    },
+    {
+      id: 3,
+      nombre: "Lucía Gómez",
+      telefono: "320 220 3344",
+      correo: "lucia@sena.edu.co",
+      etiqueta: "Amiga",
+    },
+    {
+      id: 4,
+      nombre: "Daniel Ruiz",
+      telefono: "312 998 7755",
+      correo: "daniel@sena.edu.co",
+      etiqueta: "Colega",
+    },
+    {
+      id: 5,
+      nombre: "Sofía Ortega",
+      telefono: "314 667 1900",
+      correo: "sofia@sena.edu.co",
+      etiqueta: "Cliente",
+    },
+    {
+      id: 6,
+      nombre: "Andrés Mora",
+      telefono: "300 321 4422",
+      correo: "andres@sena.edu.co",
+      etiqueta: "Proveedor",
+    },
+    {
+      id: 7,
+      nombre: "Valeria Díaz",
+      telefono: "318 145 6622",
+      correo: "valeria@sena.edu.co",
+      etiqueta: "Compañera",
+    },
   ]);
 
   // Guardará el contacto completo a editar (o null si solo estamos agregando)
@@ -23,6 +65,8 @@ export default function App() {
   const [error, setError] = useState("");
   const [busqueda, setBusqueda] = useState("");
   const [ordenAscendente, setOrdenAscendente] = useState(true);
+  const [paginaActual, setPaginaActual] = useState(1);
+  const [contactosPorPagina, setContactosPorPagina] = useState(3);
 
   // Agrega o edita según corresponda
   const guardarContacto = async (datos) => {
@@ -75,6 +119,27 @@ export default function App() {
       return ordenAscendente ? resultado : -resultado;
     });
 
+  const totalPaginas = Math.max(
+    1,
+    Math.ceil(contactosVisibles.length / contactosPorPagina)
+  );
+
+  const indiceInicio = (paginaActual - 1) * contactosPorPagina;
+  const contactosPaginados = contactosVisibles.slice(
+    indiceInicio,
+    indiceInicio + contactosPorPagina
+  );
+
+  useEffect(() => {
+    setPaginaActual(1);
+  }, [busqueda, ordenAscendente, contactosPorPagina]);
+
+  useEffect(() => {
+    if (paginaActual > totalPaginas) {
+      setPaginaActual(totalPaginas);
+    }
+  }, [paginaActual, totalPaginas]);
+
   return (
     <main className="app-container">
       <header className="app-header">
@@ -119,13 +184,26 @@ export default function App() {
             >
               {ordenAscendente ? "A-Z" : "Z-A"}
             </button>
+            <select
+              className="select-paginacion"
+              value={contactosPorPagina}
+              onChange={(e) => setContactosPorPagina(Number(e.target.value))}
+              aria-label="Cantidad de contactos por página"
+            >
+              <option value={2}>2 / pág.</option>
+              <option value={3}>3 / pág.</option>
+              <option value={5}>5 / pág.</option>
+            </select>
           </div>
         </div>
         {busqueda && <p className="resumen-busqueda">Resultados para “{busqueda}”: {contactosVisibles.length}</p>}
+        <p className="resumen-paginacion">
+          Página {paginaActual} de {totalPaginas} · {contactosVisibles.length} contacto{contactosVisibles.length === 1 ? "" : "s"}
+        </p>
         <div className="lista-contactos">
-        {contactosVisibles.length === 0 ? (
+        {contactosPaginados.length === 0 ? (
           <p className="sin-resultados">No se encontraron contactos con ese inicio de nombre.</p>
-        ) : contactosVisibles.map((c) => (
+        ) : contactosPaginados.map((c) => (
           <ContactoCard
             key={c.id}
             contacto={c}
@@ -133,6 +211,37 @@ export default function App() {
             onEdit={seleccionarParaEditar}
           />
         ))}
+        </div>
+
+        <div className="paginador" aria-label="Paginación de contactos">
+          <button
+            type="button"
+            className="btn-pagina"
+            disabled={paginaActual === 1}
+            onClick={() => setPaginaActual((actual) => Math.max(1, actual - 1))}
+          >
+            ← Anterior
+          </button>
+
+          {Array.from({ length: totalPaginas }, (_, index) => index + 1).map((numero) => (
+            <button
+              key={numero}
+              type="button"
+              className={`btn-numero ${numero === paginaActual ? "activo" : ""}`}
+              onClick={() => setPaginaActual(numero)}
+            >
+              {numero}
+            </button>
+          ))}
+
+          <button
+            type="button"
+            className="btn-pagina"
+            disabled={paginaActual === totalPaginas}
+            onClick={() => setPaginaActual((actual) => Math.min(totalPaginas, actual + 1))}
+          >
+            Siguiente →
+          </button>
         </div>
       </section>
     </main>
